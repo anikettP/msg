@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11:11 – For Pranjal</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,700&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+    
+    <!-- Frameworks -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        hand: ['Shadows Into Light', 'cursive'],
+                    },
+                    colors: {
+                        obsidian: '#0a0205',
+                        rosewood: '#1f0510',
+                        blush: '#fb7185',
+                        luxury: '#fff1f2',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --accent: #fb7185;
+            --accent-glow: rgba(251, 113, 133, 0.4);
+        }
+
+        body {
+            background: radial-gradient(circle at center, #1f0510 0%, #0a0205 100%);
+            color: #fff1f2;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* High-End Canvas */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        /* Premium Typography */
+        .glow-text {
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+        
+        .glow-text-intense {
+            text-shadow: 0 0 30px var(--accent-glow), 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 2rem;
+        }
+
+        /* Animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slow-fade {
+            opacity: 0;
+            transition: opacity 2.5s ease-in-out;
+        }
+
+        .slow-fade.visible {
+            opacity: 1;
+        }
+
+        .cursor::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+            color: var(--accent);
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0205; }
+        ::-webkit-scrollbar-thumb { 
+            background: linear-gradient(#fb7185, #3b0918); 
+            border-radius: 10px; 
+        }
+
+        /* Interactive Moon */
+        .moon {
+            width: clamp(150px, 20vw, 250px);
+            height: clamp(150px, 20vw, 250px);
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff1f2, #fda4af);
+            box-shadow: 
+                0 0 80px 10px rgba(251, 113, 133, 0.3),
+                inset -20px -20px 50px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+        }
+
+        .moon:hover {
+            transform: scale(1.08) rotate(5deg);
+        }
+
+        /* Camera & Polaroid CSS */
+        .camera-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            cursor: pointer;
+            margin-top: 40px;
+            z-index: 20;
+        }
+
+        .camera-btn {
+            font-size: 80px;
+            color: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 10px rgba(251, 113, 133, 0.2));
+        }
+
+        .camera-container:hover .camera-btn {
+            color: var(--accent);
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 20px rgba(251, 113, 133, 0.5));
+        }
+
+        .flash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .polaroid {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(0) rotate(0deg) scale(0);
+            width: 220px;
+            height: 260px;
+            background: #fdfdfd;
+            padding: 12px 12px 40px 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            pointer-events: none;
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .polaroid.eject {
+            transform: translateX(-50%) translateY(120px) rotate(-5deg) scale(1);
+            pointer-events: auto;
+        }
+
+        .photo-area {
+            width: 100%;
+            height: 180px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+
+        .photo-area i {
+            font-size: 50px;
+            color: var(--accent);
+            opacity: 0.8;
+        }
+
+        .polaroid-caption {
+            font-family: 'Shadows Into Light', cursive;
+            color: #333;
+            font-size: 1.2rem;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        /* Sparkle Trail */
+        .trail-particle {
+            position: fixed;
+            pointer-events: none;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            z-index: 9999;
+            box-shadow: 0 0 10px var(--accent);
+            animation: trailFade 0.8s ease-out forwards;
+        }
+
+        @keyframes trailFade {
+            to { opacity: 0; transform: scale(2) translateY(20px); }
+        }
+
+        .heart-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10001;
+            animation: heartFloat 2s ease-out forwards;
+        }
+        @keyframes heartFloat {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.5) rotate(var(--rot)); opacity: 0; }
+        }
+
+        .sparkle-burst {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            border-radius: 50%;
+            animation: sparkleAnim 1.5s ease-out forwards;
+        }
+
+        @keyframes sparkleAnim {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blush selection:text-white font-sans">
+
+    <div class="flash-overlay" id="flash"></div>
+    <canvas id="starfield"></canvas>
+
+    <audio id="bg-music" loop>
+        <source src="your-bollywood-song.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+        <div class="space-y-8 max-w-4xl relative z-10">
+            <h1 class="text-7xl md:text-9xl font-serif glow-text-intense tracking-tighter italic font-semibold text-luxury">11:11</h1>
+            <p class="text-lg md:text-2xl font-light tracking-[0.3em] uppercase text-rose-200/70">Handmade for you</p>
+            
+            <p id="hero-reveal" class="text-2xl md:text-4xl font-serif italic text-luxury slow-fade mt-16 leading-relaxed">
+                "(I literally wrote this code from scratch just to see you smile ✨)"
+            </p>
+        </div>
+        
+        <div class="absolute bottom-12 flex flex-col items-center gap-4 animate-pulse">
+            <span class="text-[10px] tracking-[0.5em] uppercase text-rose-300">Scroll to explore</span>
+            <div class="w-[1px] h-12 bg-gradient-to-b from-blush to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- TYPEWRITER SECTION -->
+    <section id="wish" class="w-full min-h-[80vh] flex items-center justify-center px-6 py-32">
+        <div class="max-w-4xl w-full text-center">
+            <div id="typewriter-container" class="font-serif text-3xl md:text-5xl leading-tight text-rose-100/90 space-y-8 min-h-[200px]">
+                <!-- Typewriter lines injected via JS -->
+            </div>
+            
+            <div id="wish-reveal" class="mt-24 text-2xl md:text-4xl font-serif text-white glow-text italic slow-fade opacity-0">
+                "Pranjal... I hope this handmade page makes your day."
+            </div>
+        </div>
+    </section>
+
+    <!-- THE RIDE (PARALLAX) -->
+    <section id="ride" class="relative w-full" style="height: 300vh;">
+        <div class="sticky top-0 w-full h-screen flex flex-col items-center justify-center overflow-hidden">
+            <div id="ride-bg-overlay" class="absolute inset-0 transition-colors duration-1000"></div>
+            
+            <div class="absolute inset-0 flex items-center justify-center px-8 text-center pointer-events-none z-10">
+                <h2 id="ride-text-1" class="text-3xl md:text-6xl font-serif italic glow-text absolute transition-all duration-1000 opacity-0 transform translate-y-4">Me figuring out how code works... 😅</h2>
+                <h2 id="ride-text-2" class="text-3xl md:text-6xl font-serif italic glow-text absolute transition-all duration-1000 opacity-0 transform translate-y-4">Just trying not to break the website...</h2>
+                <h2 id="ride-text-3" class="text-3xl md:text-6xl font-serif italic glow-text absolute transition-all duration-1000 opacity-0 transform translate-y-4">To create something as sweet as you.</h2>
+            </div>
+
+            <!-- Bike Track -->
+            <div class="absolute bottom-1/4 w-full max-w-6xl mx-auto px-10 z-20">
+                <div class="w-full h-[2px] bg-white/10 relative overflow-visible">
+                    <div id="bike-icon" class="absolute top-1/2 -translate-y-1/2 text-3xl md:text-5xl text-luxury transform -scale-x-100 transition-all duration-200" style="left: 0%;">
+                        <i class="fa-solid fa-motorcycle drop-shadow-[0_0_15px_#fb7185]"></i>
+                        <div class="absolute top-1/2 right-full w-24 h-[4px] bg-gradient-to-r from-transparent to-blush/60 blur-sm -translate-y-1/2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 11:11 TIMER SECTION -->
+    <section id="clock-section" class="relative w-full min-h-screen flex items-center justify-center px-6 py-20">
+        <div class="glass-card p-12 md:p-24 text-center relative z-20 w-full max-w-3xl overflow-hidden shadow-2xl">
+            <div id="digital-clock" class="text-7xl md:text-9xl font-sans font-extralight tracking-widest text-luxury mb-12 glow-text">
+                11:10:21
+            </div>
+            
+            <div id="clock-message" class="text-xl md:text-3xl font-serif text-rose-200 h-24 leading-relaxed transition-all duration-500">
+                I’ll wait for 11:11…<br>
+                <span class="text-sm md:text-lg mt-4 block text-rose-300/60 uppercase tracking-[0.3em]">Some moments deserve the time</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- FINALE & CAMERA -->
+    <section id="moon-section" class="relative min-h-screen flex flex-col items-center justify-center px-6 py-32 space-y-16 overflow-hidden">
+        <div class="flex flex-col items-center gap-4">
+            <div class="moon flex items-center justify-center group">
+                <i class="fa-solid fa-heart text-4xl md:text-6xl text-rose-400 opacity-40 animate-pulse"></i>
+            </div>
+            <p id="moon-tap-text" class="text-rose-300/50 text-xs font-sans tracking-[0.4em] uppercase animate-bounce">
+                Tap the moon
+            </p>
+        </div>
+        
+        <div class="text-center max-w-3xl space-y-8">
+            <h3 class="text-3xl md:text-5xl font-serif text-luxury fade-in-up">
+                A moment captured forever.
+            </h3>
+            <p class="text-xl md:text-2xl font-sans font-light leading-relaxed text-rose-100/80 fade-in-up" style="transition-delay: 200ms;">
+                I just wanted to remind you how wonderful you are.
+                <span class="text-luxury font-medium glow-text block mt-4 text-3xl">Keep that smile, Pranjal. 🌸</span>
+            </p>
+        </div>
+
+        <!-- THE CAMERA & POLAROID -->
+        <div class="camera-container fade-in-up flex items-center justify-center" style="transition-delay: 400ms;" id="camera-trigger">
+            <i class="fa-solid fa-camera-retro camera-btn"></i>
+            
+            <div class="polaroid" id="polaroid-card">
+                <div class="photo-area">
+                    <i class="fa-solid fa-heart animate-pulse"></i>
+                </div>
+                <p class="polaroid-caption">For Pranjal... Stay amazing! ✨</p>
+            </div>
+        </div>
+        <div class="text-rose-300/40 text-[10px] tracking-[0.3em] uppercase fade-in-up" style="transition-delay: 500ms;">
+            Capture the vibe
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="w-full py-16 text-center px-6 border-t border-white/5 opacity-40">
+        <p class="font-serif italic text-rose-300 text-xs">
+            Handcrafted with absolute care & coding.
+        </p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Particle Background Logic
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                initStars();
+            }
+
+            function initStars() {
+                stars = [];
+                const numStars = Math.floor((canvas.width * canvas.height) / 4000);
+                for(let i=0; i<numStars; i++) {
+                    stars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        size: Math.random() * 10 + 5,
+                        speed: Math.random() * 0.4 + 0.1,
+                        opacity: Math.random() * 0.5 + 0.2,
+                        sway: Math.random() * Math.PI * 2,
+                        color: ['#fb7185', '#fda4af', '#fff1f2'][Math.floor(Math.random()*3)]
+                    });
+                }
+            }
+
+            function animateStars() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                stars.forEach(s => {
+                    s.y -= s.speed;
+                    s.x += Math.sin(s.sway) * 0.3;
+                    s.sway += 0.01;
+                    if(s.y < -20) s.y = canvas.height + 20;
+
+                    ctx.globalAlpha = s.opacity;
+                    ctx.fillStyle = s.color;
+                    ctx.font = `${s.size}px serif`;
+                    ctx.fillText('❤', s.x, s.y);
+                });
+                requestAnimationFrame(animateStars);
+            }
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas(); animateStars();
+
+            // 2. Audio Autoplay Trick
+            const audioEl = document.getElementById('bg-music');
+            let hasMusicStarted = false;
+            function startMusic() {
+                if (!hasMusicStarted) {
+                    audioEl.play().catch(() => {});
+                    hasMusicStarted = true;
+                }
+            }
+            ['click', 'touchstart', 'scroll'].forEach(ev => document.addEventListener(ev, startMusic, {once: true}));
+
+            // 3. Typewriter Effect
+            const typeLines = [
+                "That incredibly cute smile of yours.",
+                "It's my absolute favorite thing."
+            ];
+            const typeContainer = document.getElementById('typewriter-container');
+            const wishReveal = document.getElementById('wish-reveal');
+            let hasTyped = false;
+
+            async function typeText() {
+                if(hasTyped) return;
+                hasTyped = true;
+                for(let line of typeLines) {
+                    const div = document.createElement('div');
+                    div.className = 'cursor';
+                    typeContainer.appendChild(div);
+                    for(let char of line) {
+                        div.innerHTML += char;
+                        await new Promise(r => setTimeout(r, 70));
+                    }
+                    div.classList.remove('cursor');
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+                wishReveal.style.opacity = '1';
+                wishReveal.classList.add('visible');
+            }
+
+            // 4. Scroll Reveal Observer
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if(e.isIntersecting) {
+                        e.target.classList.add('visible');
+                        if(e.target.id === 'wish') typeText();
+                    }
+                });
+            }, { threshold: 0.15 });
+            document.querySelectorAll('.fade-in-up, #wish').forEach(el => observer.observe(el));
+
+            // 5. Parallax Bike Ride
+            const rideSection = document.getElementById('ride');
+            const bike = document.getElementById('bike-icon');
+            const rt1 = document.getElementById('ride-text-1'), rt2 = document.getElementById('ride-text-2'), rt3 = document.getElementById('ride-text-3');
+
+            window.addEventListener('scroll', () => {
+                const rect = rideSection.getBoundingClientRect();
+                const winH = window.innerHeight;
+                let prog = 0;
+                if(rect.top <= 0 && rect.bottom >= winH) {
+                    prog = Math.abs(rect.top) / (rect.height - winH);
+                } else if(rect.bottom < winH) prog = 1;
+
+                bike.style.left = `${10 + (prog * 80)}%`;
+                rt1.style.opacity = (prog > 0.1 && prog < 0.35) ? '1' : '0';
+                rt2.style.opacity = (prog > 0.4 && prog < 0.65) ? '1' : '0';
+                rt3.style.opacity = (prog > 0.7 && prog < 0.95) ? '1' : '0';
+                [rt1, rt2, rt3].forEach(t => t.style.transform = t.style.opacity === '1' ? 'translateY(0)' : 'translateY(20px)');
+            });
+
+            // 6. 11:11 Smart Timer
+            const clockEl = document.getElementById('digital-clock');
+            const msgEl = document.getElementById('clock-message');
+            let timerM = 10, timerS = 21, active = false, clockInView = false;
+
+            new IntersectionObserver(e => {
+                clockInView = e[0].isIntersecting;
+                if(!clockInView) {
+                    timerM = 10; timerS = 21; active = false;
+                    clockEl.classList.remove('glow-text-intense', 'text-blush');
+                    msgEl.innerHTML = `I’ll wait for 11:11…<br><span class="text-sm mt-4 block text-rose-300/60 uppercase tracking-[0.3em]">Some moments deserve the time</span>`;
+                    clockEl.textContent = "11:10:21";
+                }
+            }, {threshold: 0.1}).observe(document.getElementById('clock-section'));
+
+            function triggerPopCrackers() {
+                const rect = clockEl.getBoundingClientRect();
+                for(let i=0; i<8; i++) {
+                    setTimeout(() => {
+                        for(let j=0; j<35; j++) {
+                            const p = document.createElement('div');
+                            p.className = 'sparkle-burst';
+                            p.style.left = (rect.left + rect.width/2) + 'px';
+                            p.style.top = (rect.top + rect.height/2) + 'px';
+                            p.style.width = p.style.height = (Math.random()*7+2)+'px';
+                            p.style.background = ['#fb7185', '#fef08a', '#ffffff', '#fda4af'][Math.floor(Math.random()*4)];
+                            p.style.boxShadow = `0 0 15px ${p.style.background}`;
+                            p.style.setProperty('--tx', `${(Math.random()-0.5)*700}px`);
+                            p.style.setProperty('--ty', `${(Math.random()-0.5)*700}px`);
+                            document.body.appendChild(p);
+                            setTimeout(() => p.remove(), 1500);
+                        }
+                    }, i * 350);
+                }
+            }
+
+            setInterval(() => {
+                if(!clockInView || active) return;
+                timerS++;
+                if(timerS >= 60) { timerM++; timerS = 0; }
+                
+                if(timerM === 11 && timerS === 0) {
+                    active = true;
+                    clockEl.textContent = "11:11:00";
+                    msgEl.innerHTML = `<span class="text-blush glow-text italic animate-pulse">Make a wish, Pranjal! ✨🎉</span>`;
+                    clockEl.classList.add('glow-text-intense', 'text-blush');
+                    triggerPopCrackers();
+                    return;
+                }
+                clockEl.textContent = `11:${timerM.toString().padStart(2, '0')}:${timerS.toString().padStart(2, '0')}`;
+            }, 1000);
+
+            // 7. Interactive Moon & Camera
+            const moon = document.querySelector('.moon'), tapT = document.getElementById('moon-tap-text');
+            const cameraTrigger = document.getElementById('camera-trigger');
+            const flash = document.getElementById('flash');
+            const polaroid = document.getElementById('polaroid-card');
+
+            function burstHearts(x, y) {
+                for(let i=0; i<25; i++) {
+                    const h = document.createElement('div');
+                    h.className = 'heart-particle text-blush';
+                    h.innerHTML = '❤';
+                    h.style.left = x + 'px'; h.style.top = y + 'px';
+                    h.style.setProperty('--tx', `${(Math.random()-0.5)*500}px`);
+                    h.style.setProperty('--ty', `${-Math.random()*400-50}px`);
+                    h.style.setProperty('--rot', `${(Math.random()-0.5)*250}deg`);
+                    document.body.appendChild(h);
+                    setTimeout(() => h.remove(), 2000);
+                }
+            }
+
+            moon.addEventListener('click', (e) => {
+                burstHearts(e.clientX, e.clientY);
+                tapT.innerHTML = "Sending magic vibes! ✨💖";
+                tapT.classList.remove('animate-bounce');
+                moon.style.transform = "scale(1.15)";
+                setTimeout(() => moon.style.transform = "", 200);
+            });
+
+            cameraTrigger.addEventListener('click', (e) => {
+                // Flash Effect
+                flash.style.opacity = '1';
+                setTimeout(() => flash.style.opacity = '0', 100);
+                flash.style.transition = 'opacity 0.5s ease-out';
+
+                // Eject Polaroid
+                polaroid.classList.add('eject');
+                burstHearts(e.clientX, e.clientY);
+            });
+
+            // 8. Sparkle Trail Effect
+            let lastSparkle = 0;
+            const handleTrail = (e) => {
+                const now = Date.now();
+                if (now - lastSparkle < 50) return;
+                lastSparkle = now;
+
+                const moonSec = document.getElementById('moon-section');
+                const r = moonSec.getBoundingClientRect();
+                
+                if (r.top < window.innerHeight && r.bottom > 0) {
+                    const p = document.createElement('div');
+                    p.className = 'trail-particle';
+                    const x = e.touches ? e.touches[0].clientX : e.clientX;
+                    const y = e.touches ? e.touches[0].clientY : e.clientY;
+                    p.style.left = x + 'px';
+                    p.style.top = y + 'px';
+                    document.body.appendChild(p);
+                    setTimeout(() => p.remove(), 800);
+                }
+            };
+            document.addEventListener('mousemove', handleTrail);
+            document.addEventListener('touchmove', handleTrail);
+        });
+    </script>
+</body>
+</html>
