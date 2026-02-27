@@ -47,6 +47,19 @@
             line-height: 1.6;
         }
 
+        /* Loading/Enter Overlay */
+        #enter-overlay {
+            position: fixed;
+            inset: 0;
+            background: #0a0205;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease-out, visibility 1s;
+        }
+
         /* High-End Canvas */
         #starfield {
             position: fixed;
@@ -124,10 +137,6 @@
             cursor: pointer;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 10;
-        }
-
-        .moon:hover {
-            transform: scale(1.08) rotate(5deg);
         }
 
         /* Camera & Polaroid CSS */
@@ -215,7 +224,7 @@
             text-align: center;
         }
 
-        /* Sparkle Trail */
+        /* Particles */
         .trail-particle {
             position: fixed;
             pointer-events: none;
@@ -259,10 +268,22 @@
 </head>
 <body class="antialiased selection:bg-blush selection:text-white font-sans">
 
+    <!-- Enter Overlay (Standard for Autoplay Music) -->
+    <div id="enter-overlay">
+        <div class="text-center space-y-8 px-6">
+            <h2 class="text-luxury font-serif italic text-3xl md:text-5xl glow-text">11:11</h2>
+            <p class="text-rose-200/60 font-sans tracking-[0.4em] uppercase text-xs">Waiting for a special moment</p>
+            <button id="enter-btn" class="mt-8 px-12 py-4 border border-blush/40 text-blush rounded-full hover:bg-blush hover:text-obsidian transition-all duration-500 tracking-widest uppercase text-sm font-medium shadow-[0_0_20px_rgba(251,113,133,0.1)]">
+                Enter Experience
+            </button>
+        </div>
+    </div>
+
     <div class="flash-overlay" id="flash"></div>
     <canvas id="starfield"></canvas>
 
-    <audio id="bg-music" loop>
+    <!-- Background Music -->
+    <audio id="bg-music" loop preload="auto">
         <source src="Raabta.mp3" type="audio/mpeg">
     </audio>
 
@@ -287,7 +308,7 @@
     <section id="wish" class="w-full min-h-[80vh] flex items-center justify-center px-6 py-32">
         <div class="max-w-4xl w-full text-center">
             <div id="typewriter-container" class="font-serif text-3xl md:text-5xl leading-tight text-rose-100/90 space-y-8 min-h-[200px]">
-                <!-- Typewriter lines injected via JS -->
+                <!-- Typewriter lines -->
             </div>
             
             <div id="wish-reveal" class="mt-24 text-2xl md:text-4xl font-serif text-white glow-text italic slow-fade opacity-0">
@@ -426,16 +447,26 @@
             window.addEventListener('resize', resizeCanvas);
             resizeCanvas(); animateStars();
 
-            // 2. Audio Autoplay Trick
+            // 2. Audio Autoplay Management
             const audioEl = document.getElementById('bg-music');
-            let hasMusicStarted = false;
-            function startMusic() {
-                if (!hasMusicStarted) {
-                    audioEl.play().catch(() => {});
-                    hasMusicStarted = true;
-                }
-            }
-            ['click', 'touchstart', 'scroll'].forEach(ev => document.addEventListener(ev, startMusic, {once: true}));
+            const enterOverlay = document.getElementById('enter-overlay');
+            const enterBtn = document.getElementById('enter-btn');
+
+            enterBtn.addEventListener('click', () => {
+                // Play music immediately on click
+                audioEl.play().catch(e => console.log("Audio failed:", e));
+                
+                // Fade out overlay
+                enterOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    enterOverlay.style.visibility = 'hidden';
+                }, 1000);
+
+                // Start Hero animations after entrance
+                setTimeout(() => {
+                    document.getElementById('hero-reveal').classList.add('visible');
+                }, 1000);
+            });
 
             // 3. Typewriter Effect
             const typeLines = [
@@ -576,12 +607,9 @@
             });
 
             cameraTrigger.addEventListener('click', (e) => {
-                // Flash Effect
                 flash.style.opacity = '1';
                 setTimeout(() => flash.style.opacity = '0', 100);
                 flash.style.transition = 'opacity 0.5s ease-out';
-
-                // Eject Polaroid
                 polaroid.classList.add('eject');
                 burstHearts(e.clientX, e.clientY);
             });
@@ -594,6 +622,7 @@
                 lastSparkle = now;
 
                 const moonSec = document.getElementById('moon-section');
+                if(!moonSec) return;
                 const r = moonSec.getBoundingClientRect();
                 
                 if (r.top < window.innerHeight && r.bottom > 0) {
